@@ -1,0 +1,64 @@
+spring:
+  application:
+    name: sftpwatcher
+  datasource:
+    url: jdbc:h2:mem:sftpwatcher;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+  threads:
+    virtual:
+      enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+app:
+  sftp:
+    servers:
+      server-a:
+        host: sftp-a.example.com
+        port: 22
+        username: myuser
+        private-key-location: classpath:keys/server-a.pem
+        known-hosts-location: classpath:keys/known_hosts
+        connect-timeout-ms: 10000
+        session-timeout-ms: 10000
+    jobs:
+      batchfile1-poll:
+        enabled: true
+        mode: READ
+        server-ref: server-a
+        schedule: "0 */5 * * * *"
+        remote-directory: /read-directory/batchfile1
+        file-pattern: "BATCHFILE1_.*\\.csv"
+        pattern-type: REGEX
+        selection-strategy: LATEST
+        processor-ref: batchFile1Processor
+        post-action: MOVE
+        archive-directory: /archive/batchfile1
+        idempotency-key-strategy: PATH_SIZE_MTIME
+      batchfile2-poll:
+        enabled: true
+        mode: READ
+        server-ref: server-a
+        schedule: "0 */10 * * * *"
+        remote-directory: /read-directory/batchfile2
+        exact-filename: control.txt
+        selection-strategy: EXACT_NAME
+        processor-ref: batchFile2Processor
+        post-action: NONE
+      outbound-report-upload:
+        enabled: true
+        mode: WRITE
+        server-ref: server-a
+        remote-directory: /outbound/reports
+        filename-template: "report_{{yyyyMMddHHmmss}}.csv"
