@@ -80,7 +80,7 @@ public class DefaultJobExecutor implements JobExecutor {
             int skipped = 0;
             for (RemoteFileMetadata metadata : selected) {
                 String fileKey = job.getIdempotencyKeyStrategy().buildKey(metadata);
-                if (processedFileStore.hasProcessed(jobName, fileKey)) {
+                if (processedFileStore.isProcessed(jobName, fileKey)) {
                     skipped++;
                     meterRegistry.counter("sftp.files.skipped", "jobName", jobName).increment();
                     continue;
@@ -101,7 +101,18 @@ public class DefaultJobExecutor implements JobExecutor {
                     if (!result.successful()) {
                         throw new IllegalStateException(result.message());
                     }
-                    processedFileStore.markProcessed(jobName, job.getServerRef(), metadata, fileKey, clock.instant(), "SUCCESS");
+                    if (!processedFileStore.recordSuccessIfAbsent(jobName, job.getServerRef(), metadata, fileKey, clock.instant(), "SUCCESS")) {
+                        skipped++;
+                        meterRegistry.counter("sftp.files.skipped", "jobName", jobName).increment();
+                        log.atInfo()
+                                .setMessage("Skipped duplicate file after atomic processed-state check")
+                                .addKeyValue("jobName", jobName)
+                                .addKeyValue("serverRef", job.getServerRef())
+                                .addKeyValue("remotePath", metadata.remotePath())
+                                .addKeyValue("filename", metadata.filename())
+                                .log();
+                        continue;
+                    }
                     applyPostAction(job, metadata);
                     processed++;
                     meterRegistry.counter("sftp.files.processed", "jobName", jobName).increment();

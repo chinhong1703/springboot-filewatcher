@@ -125,6 +125,35 @@ class DefaultJobExecutorTest {
         assertThat(summary.skippedCount()).isEqualTo(1);
     }
 
+    @Test
+    void treatsAtomicProcessedStateCollisionAsSkip() {
+        AppSftpProperties properties = propertiesForReadJob(PostAction.NONE);
+        InMemorySftpClient sftpClient = new InMemorySftpClient();
+        sftpClient.putFile("/in/file.csv", "hello".getBytes(StandardCharsets.UTF_8), Instant.parse("2024-01-01T00:00:00Z"));
+        InMemoryProcessedFileStore store = new InMemoryProcessedFileStore() {
+            @Override
+            public boolean recordSuccessIfAbsent(String jobName, String serverRef, com.example.sftpwatcher.domain.RemoteFileMetadata metadata, String fileKey, Instant processedAt, String status) {
+                return false;
+            }
+        };
+
+        DefaultJobExecutor executor = new DefaultJobExecutor(
+                properties,
+                sftpClient,
+                new FileSelectionService(),
+                processorRef -> payload -> ProcessingResult.success("ok"),
+                store,
+                new JobStatusTracker(),
+                new SimpleMeterRegistry()
+        );
+
+        var summary = executor.execute("job1");
+
+        assertThat(summary.processedCount()).isZero();
+        assertThat(summary.skippedCount()).isEqualTo(1);
+        assertThat(sftpClient.exists("server-a", "/in/file.csv")).isTrue();
+    }
+
     private AppSftpProperties propertiesForReadJob(PostAction postAction) {
         AppSftpProperties properties = new AppSftpProperties();
         AppSftpProperties.ServerProperties server = new AppSftpProperties.ServerProperties();

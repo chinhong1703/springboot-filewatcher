@@ -20,8 +20,9 @@ class JpaProcessedFileStoreTest {
     void persistsAndFindsProcessedFiles() {
         RemoteFileMetadata metadata = new RemoteFileMetadata("/in/file.csv", "file.csv", Instant.parse("2024-01-01T00:00:00Z"), 10);
 
-        store.markProcessed("job1", "server-a", metadata, "key1", Instant.now(), "SUCCESS");
+        assertThat(store.recordSuccessIfAbsent("job1", "server-a", metadata, "key1", Instant.now(), "SUCCESS")).isTrue();
+        assertThat(store.recordSuccessIfAbsent("job1", "server-a", metadata, "key1", Instant.now(), "SUCCESS")).isFalse();
 
-        assertThat(store.hasProcessed("job1", "key1")).isTrue();
+        assertThat(store.isProcessed("job1", "key1")).isTrue();
     }
 }

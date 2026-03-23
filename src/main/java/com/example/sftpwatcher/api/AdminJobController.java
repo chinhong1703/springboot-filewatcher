@@ -3,7 +3,7 @@ package com.example.sftpwatcher.api;
 import com.example.sftpwatcher.config.AppSftpProperties;
 import com.example.sftpwatcher.domain.JobDescriptor;
 import com.example.sftpwatcher.domain.JobRunSummary;
-import com.example.sftpwatcher.service.JobExecutor;
+import com.example.sftpwatcher.service.JobCoordinator;
 import com.example.sftpwatcher.service.JobStatusTracker;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -20,12 +20,12 @@ import org.springframework.web.server.ResponseStatusException;
 public class AdminJobController {
 
     private final AppSftpProperties properties;
-    private final JobExecutor jobExecutor;
+    private final JobCoordinator jobCoordinator;
     private final JobStatusTracker jobStatusTracker;
 
-    public AdminJobController(AppSftpProperties properties, JobExecutor jobExecutor, JobStatusTracker jobStatusTracker) {
+    public AdminJobController(AppSftpProperties properties, JobCoordinator jobCoordinator, JobStatusTracker jobStatusTracker) {
         this.properties = properties;
-        this.jobExecutor = jobExecutor;
+        this.jobCoordinator = jobCoordinator;
         this.jobStatusTracker = jobStatusTracker;
     }
 
@@ -50,7 +50,7 @@ public class AdminJobController {
         if (!properties.getJobs().containsKey(jobName)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown job");
         }
-        return jobExecutor.execute(jobName);
+        return jobCoordinator.run(jobName);
     }
 
     @GetMapping("/{jobName}/status")

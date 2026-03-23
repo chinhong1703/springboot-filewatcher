@@ -40,6 +40,22 @@ class SftpConfigurationValidationTest {
                 });
     }
 
+    @Test
+    void rejectsInvalidHeartbeatConfiguration() {
+        contextRunner.withBean(AppSftpProperties.class, () -> {
+                    AppSftpProperties properties = validProperties();
+                    properties.getScheduler().setLeaseDuration(java.time.Duration.ofSeconds(30));
+                    properties.getScheduler().setHeartbeatInterval(java.time.Duration.ofSeconds(45));
+                    return properties;
+                })
+                .run(context -> {
+                    SftpConfigurationValidator validator = context.getBean(SftpConfigurationValidator.class);
+                    org.assertj.core.api.Assertions.assertThatThrownBy(validator::validate)
+                            .isInstanceOf(IllegalStateException.class)
+                            .hasMessageContaining("heartbeatInterval");
+                });
+    }
+
     private AppSftpProperties validProperties() {
         AppSftpProperties properties = new AppSftpProperties();
         AppSftpProperties.ServerProperties server = new AppSftpProperties.ServerProperties();

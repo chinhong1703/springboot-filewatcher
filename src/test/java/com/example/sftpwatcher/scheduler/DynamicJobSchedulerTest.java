@@ -5,10 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.example.sftpwatcher.config.AppSftpProperties;
 import com.example.sftpwatcher.config.SftpConfigurationValidator;
 import com.example.sftpwatcher.domain.JobMode;
-import com.example.sftpwatcher.service.JobExecutor;
-import java.time.Instant;
 import org.junit.jupiter.api.Test;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 class DynamicJobSchedulerTest {

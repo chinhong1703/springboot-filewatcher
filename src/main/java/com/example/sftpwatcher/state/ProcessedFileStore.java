@@ -5,7 +5,7 @@ import java.time.Instant;
 
 public interface ProcessedFileStore {
 
-    boolean hasProcessed(String jobName, String fileKey);
+    boolean isProcessed(String jobName, String fileKey);
 
-    void markProcessed(String jobName, String serverRef, RemoteFileMetadata metadata, String fileKey, Instant processedAt, String status);
+    boolean recordSuccessIfAbsent(String jobName, String serverRef, RemoteFileMetadata metadata, String fileKey, Instant processedAt, String status);
 }

@@ -9,7 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.sftpwatcher.config.AppSftpProperties;
 import com.example.sftpwatcher.domain.JobMode;
 import com.example.sftpwatcher.domain.JobRunSummary;
-import com.example.sftpwatcher.service.JobExecutor;
+import com.example.sftpwatcher.service.JobCoordinator;
 import com.example.sftpwatcher.service.JobStatusTracker;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
@@ -32,7 +32,7 @@ class AdminJobControllerTest {
     private JobStatusTracker jobStatusTracker;
 
     @MockBean
-    private JobExecutor jobExecutor;
+    private JobCoordinator jobCoordinator;
 
     @Test
     void listsConfiguredJobs() throws Exception {
@@ -43,7 +43,7 @@ class AdminJobControllerTest {
 
     @Test
     void triggersJobManually() throws Exception {
-        when(jobExecutor.execute("job1")).thenReturn(new JobRunSummary(
+        when(jobCoordinator.run("job1")).thenReturn(new JobRunSummary(
                 "job1", "server-a", Instant.now(), Instant.now(), true, 1, 1, 1, 0, "ok"
         ));
 

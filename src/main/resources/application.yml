@@ -23,6 +23,10 @@ management:
 
 app:
   sftp:
+    scheduler:
+      lock-enabled: true
+      lease-duration: PT3M
+      heartbeat-interval: PT45S
     servers:
       server-a:
         host: sftp-a.example.com

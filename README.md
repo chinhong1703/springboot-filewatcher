@@ -32,3 +32,5 @@ class BatchFile1Processor implements RemoteFileProcessor { ... }
 ## Dynamic scheduling
 
 The framework does not use per-job `@Scheduled` methods. `DynamicJobScheduler` scans enabled READ jobs during startup, creates a `Runnable` per job, and registers each task with a `TaskScheduler` using the configured cron expression.
+
+In multi-node deployments, each node still registers the same cron triggers locally. A DB-backed lease ensures only one node acquires and executes a given READ job at a time, with lease heartbeats for longer-running jobs and expiry-based recovery after node failure.
