@@ -11,6 +11,16 @@ spring:
     open-in-view: false
   flyway:
     enabled: true
+  quartz:
+    job-store-type: jdbc
+    jdbc:
+      initialize-schema: always
+    properties:
+      org.quartz.scheduler.instanceName: sftpWatcherScheduler
+      org.quartz.scheduler.instanceId: AUTO
+      org.quartz.jobStore.isClustered: true
+      org.quartz.jobStore.clusterCheckinInterval: 15000
+      org.quartz.threadPool.threadCount: 5
   threads:
     virtual:
       enabled: true
@@ -23,10 +33,6 @@ management:
 
 app:
   sftp:
-    scheduler:
-      lock-enabled: true
-      lease-duration: PT3M
-      heartbeat-interval: PT45S
     servers:
       server-a:
         host: sftp-a.example.com

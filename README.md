@@ -31,6 +31,6 @@ class BatchFile1Processor implements RemoteFileProcessor { ... }
 
 ## Dynamic scheduling
 
-The framework does not use per-job `@Scheduled` methods. `DynamicJobScheduler` scans enabled READ jobs during startup, creates a `Runnable` per job, and registers each task with a `TaskScheduler` using the configured cron expression.
+The framework does not use per-job `@Scheduled` methods. `DynamicJobScheduler` scans enabled READ jobs during startup and registers a Quartz job plus cron trigger for each configured READ job.
 
-In multi-node deployments, each node still registers the same cron triggers locally. A DB-backed lease ensures only one node acquires and executes a given READ job at a time, with lease heartbeats for longer-running jobs and expiry-based recovery after node failure.
+Quartz is configured with a JDBC job store and clustered mode, so multiple service nodes can share the same scheduler state and only one node fires a given trigger at a time. Cron misfires are configured with `doNothing` so the scheduler does not backfill missed runs by default.

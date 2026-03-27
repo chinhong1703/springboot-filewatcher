@@ -14,9 +14,6 @@ class AppSftpPropertiesBindingTest {
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withUserConfiguration(TestConfig.class)
             .withPropertyValues(
-                    "app.sftp.scheduler.lock-enabled=true",
-                    "app.sftp.scheduler.lease-duration=PT3M",
-                    "app.sftp.scheduler.heartbeat-interval=PT45S",
                     "app.sftp.servers.server-a.host=sftp-a.example.com",
                     "app.sftp.servers.server-a.port=22",
                     "app.sftp.servers.server-a.username=myuser",
@@ -40,7 +37,6 @@ class AppSftpPropertiesBindingTest {
             assertThat(properties.getServers().get("server-a").getHost()).isEqualTo("sftp-a.example.com");
             assertThat(properties.getJobs().get("job1").getMode()).isEqualTo(JobMode.READ);
             assertThat(properties.getJobs().get("job1").getSelectionStrategy()).isEqualTo(SelectionStrategy.LATEST);
-            assertThat(properties.getScheduler().getLeaseDuration()).hasToString("PT3M");
         });
     }
 

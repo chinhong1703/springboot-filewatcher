@@ -3,7 +3,6 @@ package com.example.sftpwatcher.config;
 import com.example.sftpwatcher.domain.JobMode;
 import com.example.sftpwatcher.domain.PostAction;
 import com.example.sftpwatcher.processor.ProcessorRegistry;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.scheduling.support.CronExpression;
@@ -22,7 +21,6 @@ public class SftpConfigurationValidator {
 
     public void validate() {
         List<String> errors = new ArrayList<>();
-        validateScheduler(errors);
         properties.getJobs().forEach((jobName, job) -> {
             if (!properties.getServers().containsKey(job.getServerRef())) {
                 errors.add("Job '%s' references unknown serverRef '%s'".formatted(jobName, job.getServerRef()));
@@ -35,21 +33,6 @@ public class SftpConfigurationValidator {
         });
         if (!errors.isEmpty()) {
             throw new IllegalStateException(String.join("; ", errors));
-        }
-    }
-
-    private void validateScheduler(List<String> errors) {
-        Duration leaseDuration = properties.getScheduler().getLeaseDuration();
-        Duration heartbeatInterval = properties.getScheduler().getHeartbeatInterval();
-        if (leaseDuration == null || leaseDuration.isZero() || leaseDuration.isNegative()) {
-            errors.add("Scheduler leaseDuration must be positive");
-        }
-        if (heartbeatInterval == null || heartbeatInterval.isZero() || heartbeatInterval.isNegative()) {
-            errors.add("Scheduler heartbeatInterval must be positive");
-        }
-        if (leaseDuration != null && heartbeatInterval != null && !leaseDuration.isNegative() && !heartbeatInterval.isNegative()
-                && !heartbeatInterval.minus(leaseDuration).isNegative()) {
-            errors.add("Scheduler heartbeatInterval must be less than leaseDuration");
         }
     }
 

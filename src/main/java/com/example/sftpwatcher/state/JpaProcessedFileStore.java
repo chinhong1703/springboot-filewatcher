@@ -1,6 +1,7 @@
 package com.example.sftpwatcher.state;
 
 import com.example.sftpwatcher.domain.RemoteFileMetadata;
+import jakarta.persistence.EntityManager;
 import java.time.Instant;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Repository;
@@ -10,9 +11,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class JpaProcessedFileStore implements ProcessedFileStore {
 
     private final ProcessedRemoteFileJpaRepository repository;
+    private final EntityManager entityManager;
 
-    public JpaProcessedFileStore(ProcessedRemoteFileJpaRepository repository) {
+    public JpaProcessedFileStore(ProcessedRemoteFileJpaRepository repository, EntityManager entityManager) {
         this.repository = repository;
+        this.entityManager = entityManager;
     }
 
     @Override
@@ -38,6 +41,7 @@ public class JpaProcessedFileStore implements ProcessedFileStore {
             repository.saveAndFlush(entity);
             return true;
         } catch (DataIntegrityViolationException ex) {
+            entityManager.clear();
             return false;
         }
     }

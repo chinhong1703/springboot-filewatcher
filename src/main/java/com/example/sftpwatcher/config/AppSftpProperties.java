@@ -9,7 +9,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -25,9 +24,6 @@ public class AppSftpProperties {
     @Valid
     private Map<String, JobProperties> jobs = new LinkedHashMap<>();
 
-    @Valid
-    private SchedulerProperties scheduler = new SchedulerProperties();
-
     public Map<String, ServerProperties> getServers() {
         return servers;
     }
@@ -42,14 +38,6 @@ public class AppSftpProperties {
 
     public void setJobs(Map<String, JobProperties> jobs) {
         this.jobs = jobs;
-    }
-
-    public SchedulerProperties getScheduler() {
-        return scheduler;
-    }
-
-    public void setScheduler(SchedulerProperties scheduler) {
-        this.scheduler = scheduler;
     }
 
     public static class ServerProperties {
@@ -260,45 +248,4 @@ public class AppSftpProperties {
         }
     }
 
-    public static class SchedulerProperties {
-        @NotNull
-        private Boolean lockEnabled = Boolean.TRUE;
-        @NotNull
-        private Duration leaseDuration = Duration.ofMinutes(3);
-        @NotNull
-        private Duration heartbeatInterval = Duration.ofSeconds(45);
-        private String ownerId;
-
-        public Boolean getLockEnabled() {
-            return lockEnabled;
-        }
-
-        public void setLockEnabled(Boolean lockEnabled) {
-            this.lockEnabled = lockEnabled;
-        }
-
-        public Duration getLeaseDuration() {
-            return leaseDuration;
-        }
-
-        public void setLeaseDuration(Duration leaseDuration) {
-            this.leaseDuration = leaseDuration;
-        }
-
-        public Duration getHeartbeatInterval() {
-            return heartbeatInterval;
-        }
-
-        public void setHeartbeatInterval(Duration heartbeatInterval) {
-            this.heartbeatInterval = heartbeatInterval;
-        }
-
-        public String getOwnerId() {
-            return ownerId;
-        }
-
-        public void setOwnerId(String ownerId) {
-            this.ownerId = ownerId;
-        }
-    }
 }
